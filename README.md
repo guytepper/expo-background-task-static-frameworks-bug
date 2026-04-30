@@ -14,7 +14,7 @@ bun run prebuild   # expo prebuild --platform ios --clean
 bun run ios        # 5 non-modular include errors, code 65
 ```
 
-The default `package.json` resolves `expo-background-task` to `55.0.17` (broken). To verify the workaround, change `"expo-background-task"` to `"55.0.8"`, reinstall, and rebuild.
+The `package.json` pins `expo-background-task` to `55.0.17` (broken). To verify the workaround, change it to `"55.0.8"`, delete `node_modules` and `bun.lock`, then reinstall and rebuild.
 
 ## Version timeline
 
