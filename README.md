@@ -2,7 +2,15 @@
 
 ## Summary
 
-[expo/expo PR #44646](https://github.com/expo/expo/pull/44646) (shipped in `expo-background-task@55.0.17`) added `s.dependency 'ExpoTaskManager'` to `ExpoBackgroundTask.podspec`. Under `expo-build-properties.ios.useFrameworks: "static"` (commonly required by `@react-native-firebase`), the new transitive pod-level dependency `ExpoBackgroundTask → ExpoTaskManager` causes Clang to compile ExpoTaskManager's headers in a stricter cross-module context. The existing `#import <ExpoModulesCore/EX*Interface.h>` lines in `EXTask.h` / `EXTaskExecutionRequest.h` / `EXTaskService.h` then trip `-Werror=non-modular-include-in-framework-module`, because `ExpoModulesCore` is force-disabled from `use_frameworks` by Expo autolinking.
+[expo/expo PR #44646](https://github.com/expo/expo/pull/44646) (shipped in `expo-background-task@55.0.17`) added a single line to `ExpoBackgroundTask.podspec`:
+
+```ruby
+s.dependency 'ExpoTaskManager'
+```
+
+Under `expo-build-properties.ios.useFrameworks: "static"` (commonly required by `@react-native-firebase`), this new transitive pod-level dependency `ExpoBackgroundTask → ExpoTaskManager` causes Clang to compile ExpoTaskManager's headers in a stricter cross-module context.
+
+The existing `#import <ExpoModulesCore/EX*Interface.h>` lines in `EXTask.h` / `EXTaskExecutionRequest.h` / `EXTaskService.h` then trip `-Werror=non-modular-include-in-framework-module`, because `ExpoModulesCore` is force-disabled from `use_frameworks` by Expo autolinking.
 
 Result: 5 errors, `xcodebuild` exits with code 65.
 
@@ -42,13 +50,6 @@ Pin only `expo-background-task`:
 ```
 
 (Adding `"ExpoTaskManager"` to `expo-build-properties.ios.forceStaticLinking` also works but is more invasive.)
-
-## Suggested fix
-
-The PR author noted in #44646 that `import ExpoTaskManager` in Swift caused build conflicts with ExpoModulesCore types and used an Obj-C bridge to work around it. The same root cause now bites Obj-C `#import <ExpoTaskManager/EXTask.h>`. Either:
-
-1. Revert the `s.dependency 'ExpoTaskManager'` declaration and find another way to expose `EXTaskService.shared`.
-2. Or expose ExpoModulesCore's interface headers (`EX*Interface.h`) modularly so cross-pod `#import <ExpoModulesCore/...>` always resolves modularly, even when ExpoModulesCore is force-disabled from `use_frameworks`.
 
 ## Environment
 
