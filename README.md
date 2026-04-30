@@ -1,5 +1,3 @@
-# Repro: `expo-background-task@55.0.17` breaks `useFrameworks: "static"` builds
-
 ## Summary
 
 [expo/expo PR #44646](https://github.com/expo/expo/pull/44646) (shipped in `expo-background-task@55.0.17`) added a single line to `ExpoBackgroundTask.podspec`:
